@@ -49,7 +49,7 @@ export class TestController {
     // 假設這裡從請求中獲取 cookie
     const cookieValue = req.cookies['test_cookie'];
     // 回傳一個 JSON 物件，包含 cookie 的值
-    res.json({ message: 'Cookie 是這個：' + JSON.stringify(cookieValue) });
+    res.json({ message: `Cookie 是這個：${JSON.stringify(cookieValue)}` });
   }
 
   // 這是用來處理刪除 Cookie 的 POST 請求
