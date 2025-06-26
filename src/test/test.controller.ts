@@ -35,6 +35,7 @@ export class TestController {
       path: '/',
       sameSite: 'none', // 允許跨站
       secure: true, // SameSite:none 必須搭配
+      httpOnly: true,
     });
     // 回傳一個 JSON 物件，表示 Cookie 已經設定成功
     res.json({ message: 'Cookie 已設定', cookie: value });
@@ -55,11 +56,13 @@ export class TestController {
   @Post('dropCookie')
   // @Res() 用來獲取 Express 的 Response 物件
   dropCookie(@Res() res: Response) {
-    // 假設這裡刪除名為 'test_cookie' 的 cookie，並設定路徑為 '/'，代表這個 Cookie 在整個網站上都有效
-    // 注意：如果沒有設定路徑，可能會導致 Cookie 無法正確刪除
-    // 因為 Cookie 的路徑可能會影響到 Cookie 的存取範圍
-    // 這裡的路徑設定是為了確保 Cookie 在整個網站上都能被正確刪除
-    res.clearCookie('test_cookie', { path: '/' });
+    res.cookie('test_cookie', '', {
+      maxAge: 0,
+      path: '/',
+      sameSite: 'none', // 允許跨站
+      secure: true, // SameSite:none 必須搭配
+      httpOnly: true,
+    });
     // 回傳一個 JSON 物件，表示 Cookie 已經刪除
     res.json({ message: 'Cookie 已刪除' });
   }
