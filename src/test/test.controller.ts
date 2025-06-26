@@ -30,7 +30,7 @@ export class TestController {
   })
   setCookie(@Body('value') value: string, @Res() res: Response) {
     // 假設這裡設定了一個名為 'test_cookie' 的 cookie，設定 Cookie 的有效期為 10 秒
-    res.cookie('test_cookie', value, { maxAge: 10 * 1000 });
+    res.cookie('test_cookie', value, { maxAge: 10 * 1000, path: '/' });
     // 回傳一個 JSON 物件，表示 Cookie 已經設定成功
     res.json({ message: 'Cookie 已設定', cookie: value });
   }
