@@ -6,6 +6,7 @@ import { JwtOptionalMiddleware } from './auth/jwt-optional.middleware';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config';
 import { OwnerModule } from './owner/owner.module';
+import { TestController } from './test/test.controller';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { OwnerModule } from './owner/owner.module';
     AuthModule,
     OwnerModule,
   ],
+  controllers: [TestController],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
