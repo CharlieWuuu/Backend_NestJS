@@ -11,6 +11,7 @@ async function bootstrap() {
   app.use(cookieParser()); // 解析 Cookie
   app.enableCors({
     origin: [
+      'http://localhost:3000', // 開發時本機
       'http://localhost:5173', // 開發時本機
       'https://hiking-map.vercel.app', // 正式部署後的前端網址
       'https://hiking-map-git-main-charliewuuus-projects.vercel.app', // 正式部署後的前端網址
