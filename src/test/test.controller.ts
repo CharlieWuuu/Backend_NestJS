@@ -46,7 +46,7 @@ export class TestController {
   // @Req() 用來獲取 Express 的 Request 物件
   seeCookie(@Req() req: Request, @Res() res: Response) {
     // 假設這裡從請求中獲取 cookie
-    const cookieValue = req.cookies;
+    const cookieValue = req.cookies['test_cookie'];
     // 回傳一個 JSON 物件，包含 cookie 的值
     res.json({ message: 'Cookie 是這個：' + JSON.stringify(cookieValue) });
   }
