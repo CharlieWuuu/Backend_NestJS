@@ -73,23 +73,46 @@ export async function convertGpxToGeojson(file: Express.Multer.File) {
   const { DOMParser } = await import('@xmldom/xmldom');
 
   try {
-    // 將 buffer 轉成 UTF-8 字串，並移除 BOM（Byte Order Mark）
     const xmlText = file.buffer.toString('utf-8').replace(/^\uFEFF/, '');
-
-    // 將字串解析為 DOM 結構
     const gpxDom = new DOMParser().parseFromString(xmlText, 'text/xml');
-    // 驗證是否有 <gpx> 標籤
-    if (
-      !gpxDom ||
-      !gpxDom.documentElement ||
-      gpxDom.documentElement.nodeName !== 'gpx'
-    ) {
-      throw new Error('這不是有效的 GPX 檔案');
+    const featureCollection = gpxToGeojson.gpx(gpxDom);
+
+    if (featureCollection.type !== 'FeatureCollection') {
+      throw new Error('GPX 轉換後格式異常');
     }
 
-    // 轉換為 GeoJSON 結構
-    const geojson = gpxToGeojson.gpx(gpxDom);
-    return geojson;
+    const lineStrings = featureCollection.features
+      .filter(
+        (f) =>
+          f.geometry.type === 'LineString' &&
+          Array.isArray((f.geometry as any).coordinates),
+      )
+      .map((f) => f.geometry);
+
+    if (lineStrings.length === 0) {
+      throw new Error('GPX 中沒有可用的 LineString 軌跡');
+    }
+
+    let geometry;
+    if (lineStrings.length === 1) {
+      geometry = lineStrings[0]; // 單條軌跡，直接直接使用 geometry
+    } else {
+      geometry = {
+        type: 'MultiLineString',
+        coordinates: lineStrings.map((g: any) => g.coordinates), // 組成 MultiLineString
+      };
+    }
+
+    const unifiedFeature = {
+      type: 'Feature',
+      properties: {},
+      geometry,
+    };
+
+    return {
+      type: 'FeatureCollection',
+      features: [unifiedFeature],
+    };
   } catch (err) {
     console.error('GPX 轉換失敗:', err);
     throw new Error('GPX 檔案解析錯誤，請確認格式正確');
