@@ -1,4 +1,5 @@
 import * as dotenv from 'dotenv';
+import * as session from 'express-session';
 dotenv.config();
 
 import { NestFactory } from '@nestjs/core';
@@ -8,7 +9,21 @@ import cookieParser = require('cookie-parser');
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const expressApp = app.getHttpAdapter().getInstance();
+  expressApp.set('trust proxy', 1);
   app.use(cookieParser()); // 解析 Cookie
+  app.use(
+    session({
+      secret: 'your-secret-key',
+      resave: false,
+      saveUninitialized: true,
+      cookie: {
+        maxAge: 10 * 1000,
+        sameSite: 'lax',
+        secure: false, // 如果在 localhost 測試，請設為 false
+      },
+    }),
+  );
   app.enableCors({
     origin: [
       'http://localhost:3000', // 開發時本機
@@ -25,6 +40,7 @@ async function bootstrap() {
     .setDescription('因為架站平台的免費額度有限，因此統一放一起供不同專案使用')
     .setVersion('1.0')
     .addBearerAuth()
+    .addCookieAuth('connect.sid')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

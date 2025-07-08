@@ -15,7 +15,7 @@ import { ApiBody } from '@nestjs/swagger';
 // 這是 NestJS 的裝飾器，用來定義控制器
 @Controller('cookie')
 // 這是控制器的類別，負責處理與 Cookie 相關的請求
-export class TestController {
+export class CookieController {
   // 這是用來處理設定 Cookie 的 POST 請求
   @Post('setCookie')
   // @Body('value') 用來獲取請求體中的 'value' 欄位
@@ -52,6 +52,25 @@ export class TestController {
     res.json({ message: `Cookie 是這個：${JSON.stringify(cookieValue)}` });
   }
 
+  // 新增：證明 Cookie 可以被使用 (通常是後端驗證或讀取)
+  @Get('useCookie')
+  useCookie(@Req() req: Request) {
+    const authToken = req.cookies?.['test_cookie']; // 加上安全取值
+
+    if (authToken) {
+      return {
+        message: 'Cookie "test_cookie" 已被成功使用！',
+        value: authToken,
+        status: '已驗證',
+      };
+    } else {
+      return {
+        message: '找不到 Cookie "test_cookie"，請確認是否已設定。',
+        status: '未驗證',
+      };
+    }
+  }
+
   // 這是用來處理刪除 Cookie 的 POST 請求
   @Post('dropCookie')
   // @Res() 用來獲取 Express 的 Response 物件
@@ -65,5 +84,48 @@ export class TestController {
     });
     // 回傳一個 JSON 物件，表示 Cookie 已經刪除
     res.json({ message: 'Cookie 已刪除' });
+  }
+}
+
+@Controller('session')
+export class SessionController {
+  @Post('setSession')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        value: { type: 'string', example: 'hello-session' },
+      },
+    },
+  })
+  setSession(@Req() req: Request, @Body('value') value: string) {
+    req.session['test_data'] = value;
+    return { message: 'Session 已設定', value };
+  }
+
+  @Get('seeSession')
+  seeSession(@Req() req: Request) {
+    const sessionData = req.session['test_data'];
+    return { message: '目前的 Session 資料', sessionData };
+  }
+
+  @Get('useSession')
+  useSession(@Req() req: Request) {
+    const data = req.session['test_data'];
+    if (data) {
+      return { message: 'Session 有效', value: data };
+    } else {
+      return { message: 'Session 不存在或已過期' };
+    }
+  }
+
+  @Post('dropSession')
+  dropSession(@Req() req: Request) {
+    req.session.destroy((err) => {
+      if (err) {
+        console.error('Session 刪除失敗', err);
+      }
+    });
+    return { message: 'Session 已清除' };
   }
 }
